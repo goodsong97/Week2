@@ -15,4 +15,5 @@
         android:verticalSpacing="5dp"
         android:numColumns="auto_fit"
         android:id="@+id/ImgGridView"/>
+
 </LinearLayout>

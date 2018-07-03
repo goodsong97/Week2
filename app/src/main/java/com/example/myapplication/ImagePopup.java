@@ -20,72 +20,46 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
-public class ImagePopup extends Fragment implements OnClickListener{
-    public ImagePopup()
-    {
-        // required
-    }
+public class ImagePopup extends Activity implements OnClickListener{
+    private Context mContext = null;
     private final int imgWidth = 320;
     private final int imgHeight = 372;
-    String imgPath;
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            imgPath = getArguments().getString("filename");
-        }
-    }
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.image_popup,
-                container,false);
-        return view;
-        //getActivity().setContentView(R.layout.image_popup);
+        setContentView(R.layout.image_popup);
+        mContext = this;
 
         /** 전송메시지 */
-        //Intent i = getActivity().getIntent();
-        //Bundle extras = i.getExtras();
-        //String imgPath = getArguments().getString("filename");
-        //String imgPath = extras.getString("filename");
-
-
+        Intent i = getIntent();
+        Bundle extras = i.getExtras();
+        String imgPath = extras.getString("filename");
 
         /** 완성된 이미지 보여주기  */
-        //BitmapFactory.Options bfo = new BitmapFactory.Options();
-        //bfo.inSampleSize = 2;
-        //ImageView iv = (ImageView)view.findViewById(R.id.imageView);
-        //Bitmap bm = BitmapFactory.decodeFile(imgPath, bfo);
-        //Bitmap resized = Bitmap.createScaledBitmap(bm, imgWidth, imgHeight, true);
-        //iv.setImageBitmap(resized);
+        BitmapFactory.Options bfo = new BitmapFactory.Options();
+        bfo.inSampleSize = 2;
+        ImageView iv = (ImageView)findViewById(R.id.imageView);
+        Bitmap bm = BitmapFactory.decodeFile(imgPath, bfo);
+        Bitmap resized = Bitmap.createScaledBitmap(bm, imgWidth, imgHeight, true);
+        iv.setImageBitmap(resized);
 
         /** 리스트로 가기 버튼 */
-        //Button btn = (Button)view.findViewById(R.id.btn_back);
-        //btn.setOnClickListener(this);
-       // return view;
+        Button btn = (Button)findViewById(R.id.btn_back);
+        btn.setOnClickListener(this);
     }
-
     /* (non-Javadoc)
      * @see android.view.View.OnClickListener#onClick(android.view.View)
      */
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.btn_back:
-                this.onDestroy();
+                Intent intent = new Intent(mContext, MainActivity.class);
+                startActivityForResult(intent, 1);
                 break;
         }
     }
-
-
-
-
-
-
-
-    }
-
-
+}
 
 
     /*public void openFragment(Fragment fragment){

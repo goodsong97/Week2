@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.content.Intent;
+import android.support.v4.app.FragmentTransaction;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +39,16 @@ public class MainActivity extends AppCompatActivity {
         btn_second.setTag(1);
         btn_third.setOnClickListener(movePageListener);
         btn_third.setTag(2);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1){
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fm.beginTransaction();
+            fragmentTransaction.add(R.id.pager, new Fragment2());
+            fragmentTransaction.commit();
+        }
+
     }
     private class pagerAdapter extends FragmentStatePagerAdapter
     {

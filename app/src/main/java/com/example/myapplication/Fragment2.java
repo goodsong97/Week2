@@ -27,37 +27,30 @@ import android.widget.Toast;
 
 
 public class Fragment2 extends Fragment {
-    public Fragment2()
-    {
-        // required
-    }
-    @Nullable
+
+    private Context mContext;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+                            @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_fragment2, container,false);
-        GridView gv = (GridView) view.findViewById(R.id.ImgGridView);
+        View view = inflater.inflate(R.layout.fragment_fragment2,
+                container,false);
+
+        GridView gv = (GridView)view.findViewById(R.id.ImgGridView);
         final ImageAdapter ia = new ImageAdapter(getActivity());
         gv.setAdapter(ia);
-        gv.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
-                Bundle bundle = new Bundle();
-                //Intent i = new Intent(getActivity(),ImagePopup.class);
-                String imgPath = ia.getImageInfo(ia.imgData, ia.geoData, ia.thumbsIDList.get(position));
-                bundle.putString("filename", imgPath);
-                //i.putExtra("filename", imgPath);
-                ImagePopup f = new ImagePopup();
-                f.setArguments(bundle);
-                FragmentManager fmanager = getFragmentManager();
-                FragmentTransaction ftrans = fmanager.beginTransaction();
-                ftrans.replace(R.id.pager,f).addToBackStack(f.getClass().getName());
-                ftrans.commit();
+        gv.setOnItemClickListener(new OnItemClickListener(){
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id){
+                ia.callImageViewer(position);
             }
         });
         return view;
     }
 
+    /**==========================================
+     * 		        Adapter class
+     * ==========================================*/
     public class ImageAdapter extends BaseAdapter {
         private String imgData;
         private String geoData;
@@ -65,20 +58,17 @@ public class Fragment2 extends Fragment {
         private ArrayList<String> thumbsIDList;
 
         ImageAdapter(Context c){
+            mContext = c;
             thumbsDataList = new ArrayList<String>();
             thumbsIDList = new ArrayList<String>();
             getThumbInfo(thumbsIDList, thumbsDataList);
         }
 
-        public final Fragment callImageViewer(int selectedIndex){
-            Bundle bundle = new Bundle();
-            //Intent i = new Intent(getActivity(),ImagePopup.class);
+        public final void callImageViewer(int selectedIndex){
+            Intent i = new Intent(mContext, ImagePopup.class);
             String imgPath = getImageInfo(imgData, geoData, thumbsIDList.get(selectedIndex));
-            bundle.putString("filename", imgPath);
-            //i.putExtra("filename", imgPath);
-            ImagePopup f = new ImagePopup();
-            f.setArguments(bundle);
-            return f;
+            i.putExtra("filename", imgPath);
+            startActivityForResult(i, 1);
         }
 
         public boolean deleteSelected(int sIndex){
@@ -100,7 +90,7 @@ public class Fragment2 extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             ImageView imageView;
             if (convertView == null){
-                imageView = new ImageView(getActivity());
+                imageView = new ImageView(mContext);
                 imageView.setLayoutParams(new GridView.LayoutParams(250, 250));
                 imageView.setAdjustViewBounds(false);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -175,3 +165,4 @@ public class Fragment2 extends Fragment {
         }
     }
 }
+
