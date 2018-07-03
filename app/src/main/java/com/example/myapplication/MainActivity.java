@@ -9,6 +9,10 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
+import android.widget.Toast;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,16 +44,18 @@ public class MainActivity extends AppCompatActivity {
         btn_third.setOnClickListener(movePageListener);
         btn_third.setTag(2);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1){
-            FragmentManager fm = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fm.beginTransaction();
-            fragmentTransaction.add(R.id.pager, new Fragment2());
-            fragmentTransaction.commit();
-        }
-
+        super.onActivityResult(requestCode, resultCode, data);
+        BusProvider.getInstance().post(new ActivityResultEvent(requestCode, resultCode, data));
     }
+
+    @Subscribe
+    public void onActivityResult(ActivityResultEvent activityResultEvent){
+        onActivityResult(activityResultEvent.getRequestCode(), activityResultEvent.getResultCode(), activityResultEvent.getData());
+    }
+
     private class pagerAdapter extends FragmentStatePagerAdapter
     {
         public pagerAdapter(FragmentManager fm )
@@ -76,6 +82,42 @@ public class MainActivity extends AppCompatActivity {
         public int getCount() {
             // total page count
             return 3;
+        }
+    }
+    public class ActivityResultEvent {
+
+        private int requestCode;
+        private int resultCode;
+        private Intent data;
+
+        public ActivityResultEvent(int requestCode, int resultCode, Intent data) {
+            this.requestCode = requestCode;
+            this.resultCode = resultCode;
+            this.data = data;
+        }
+
+        public int getRequestCode() {
+            return requestCode;
+        }
+
+        public void setRequestCode(int requestCode) {
+            this.requestCode = requestCode;
+        }
+
+        public int getResultCode() {
+            return resultCode;
+        }
+
+        public void setResultCode(int resultCode) {
+            this.resultCode = resultCode;
+        }
+
+        public Intent getData() {
+            return data;
+        }
+
+        public void setData(Intent data) {
+            this.data = data;
         }
     }
 

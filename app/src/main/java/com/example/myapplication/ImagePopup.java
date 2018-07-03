@@ -29,14 +29,11 @@ public class ImagePopup extends Activity implements OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.image_popup);
-        mContext = this;
 
-        /** 전송메시지 */
         Intent i = getIntent();
         Bundle extras = i.getExtras();
         String imgPath = extras.getString("filename");
 
-        /** 완성된 이미지 보여주기  */
         BitmapFactory.Options bfo = new BitmapFactory.Options();
         bfo.inSampleSize = 2;
         ImageView iv = (ImageView)findViewById(R.id.imageView);
@@ -44,7 +41,6 @@ public class ImagePopup extends Activity implements OnClickListener{
         Bitmap resized = Bitmap.createScaledBitmap(bm, imgWidth, imgHeight, true);
         iv.setImageBitmap(resized);
 
-        /** 리스트로 가기 버튼 */
         Button btn = (Button)findViewById(R.id.btn_back);
         btn.setOnClickListener(this);
     }
@@ -54,8 +50,7 @@ public class ImagePopup extends Activity implements OnClickListener{
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.btn_back:
-                Intent intent = new Intent(mContext, MainActivity.class);
-                startActivityForResult(intent, 1);
+                finish();
                 break;
         }
     }
