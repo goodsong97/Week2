@@ -3,4 +3,5 @@
     <string name="first_tab">Contacts</string>
     <string name="second_tab">Gallery</string>
     <string name="third_tab">Third Tab</string>
+    <string name="back">back</string>
 </resources>
