@@ -10,17 +10,19 @@
         android:layout_height="589dp"
         android:background="#ffffff"
         android:padding="3px" />
+
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:background="#ffffff"
         android:id="@+id/lin_bottom"
         android:layout_gravity="bottom">
-    <Button
-        android:layout_height="wrap_content"
-        android:layout_width="0dip"
-        android:id="@+id/btn_back"
-        android:text="@string/back"
-        android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="209dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/back" />
     </LinearLayout>
 </FrameLayout>

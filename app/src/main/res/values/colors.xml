@@ -3,4 +3,9 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorblack">#000000</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorpastel">#D4EECC</color>
+    <color name="game_backgrounnd">#f7f7f7</color>
+    <color name="game_score">#737373</color>
 </resources>

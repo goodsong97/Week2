@@ -1,6 +1,12 @@
 package com.example.myapplication;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
+
+import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
@@ -9,7 +15,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -21,185 +30,76 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.net.Uri;
 import android.widget.Button;
+import java.util.List;
 import android.widget.AdapterView.OnItemClickListener;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.widget.Toast;
 
-import com.squareup.otto.Subscribe;
+import static android.app.Activity.RESULT_OK;
 
-/*public class Fragment2 extends Fragment {
-    private int count;
-    private Bitmap[] thumbnails;
-    private boolean[] thumbnailsselection;
-    private String[] arrPath;
-    private ImageAdapter imageAdapter;
+public class Fragment2 extends Fragment {
+    private static final int PERMISSION_REQUEST_CODE = 20;
+
+    private Context mContext;
+    private int PICK_FROM_ALBUM= 2;
+    GridView gv;
+    Button btn;
+
+    private boolean checkPermission() {
+        int result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void requestPermission() {
+        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},  PERMISSION_REQUEST_CODE);
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_fragment2,
                 container,false);
+        btn = (Button)view.findViewById(R.id.selectBtn);
+        gv = (GridView)view.findViewById(R.id.ImgGridView);
 
-        final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
-        final String orderBy = MediaStore.Images.Media._ID;
-        Cursor imagecursor = getActivity().managedQuery(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null,
-                null, orderBy);
-        int image_column_index = imagecursor.getColumnIndex(MediaStore.Images.Media._ID);
-        this.count = imagecursor.getCount();
-        this.thumbnails = new Bitmap[this.count];
-        this.arrPath = new String[this.count];
-        this.thumbnailsselection = new boolean[this.count];
-        for (int i = 0; i < this.count; i++) {
-            imagecursor.moveToPosition(i);
-            int id = imagecursor.getInt(image_column_index);
-            int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
-            thumbnails[i] = MediaStore.Images.Thumbnails.getThumbnail(
-                    getActivity().getApplicationContext().getContentResolver(), id,
-                    MediaStore.Images.Thumbnails.MICRO_KIND, null);
-            arrPath[i]= imagecursor.getString(dataColumnIndex);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkPermission()) {
+            requestPermission();
+            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+        }else {
+            showImages();
         }
-        GridView imagegrid = (GridView) view.findViewById(R.id.PhoneImageGrid);
-        imageAdapter = new ImageAdapter();
-        imagegrid.setAdapter(imageAdapter);
-        imagecursor.close();
-
-        final Button selectBtn = (Button) view.findViewById(R.id.selectBtn);
-        selectBtn.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                final int len = thumbnailsselection.length;
-                int cnt = 0;
-                String selectImages = "";
-                for (int i =0; i<len; i++)
-                {
-                    if (thumbnailsselection[i]){
-                        cnt++;
-                        selectImages = selectImages + arrPath[i] + "|";
-                    }
-                }
-                if (cnt == 0){
-                    Toast.makeText(getApplicationContext(),
-                            "Please select at least one image",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getApplicationContext(),
-                            "You've selected Total " + cnt + " image(s).",
-                            Toast.LENGTH_LONG).show();
-                    Log.d("SelectedImages", selectImages);
-                }
-            }
-        });
-    }
-    public class ImageAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
-
-        public ImageAdapter() {
-            mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        public int getCount() {
-            return count;
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                holder = new ViewHolder();
-                convertView = mInflater.inflate(
-                        R.layout.galleryitem, null);
-                holder.imageview = (ImageView) convertView.findViewById(R.id.thumbImage);
-                holder.checkbox = (CheckBox) convertView.findViewById(R.id.itemCheckBox);
-
-                convertView.setTag(holder);
-            }
-            else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            holder.checkbox.setId(position);
-            holder.imageview.setId(position);
-            holder.checkbox.setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    CheckBox cb = (CheckBox) v;
-                    int id = cb.getId();
-                    if (thumbnailsselection[id]){
-                        cb.setChecked(false);
-                        thumbnailsselection[id] = false;
-                    } else {
-                        cb.setChecked(true);
-                        thumbnailsselection[id] = true;
-                    }
-                }
-            });
-            holder.imageview.setOnClickListener(new OnClickListener() {
-
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    int id = v.getId();
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_VIEW);
-                    intent.setDataAndType(Uri.parse("file://" + arrPath[id]), "image/*");
-                    startActivity(intent);
-                }
-            });
-            holder.imageview.setImageBitmap(thumbnails[position]);
-            holder.checkbox.setChecked(thumbnailsselection[position]);
-            holder.id = position;
-            return convertView;
-        }
-    }
-    class ViewHolder {
-        ImageView imageview;
-        CheckBox checkbox;
-        int id;
-    }
-}*/
-
-public class Fragment2 extends Fragment {
-
-    private Context mContext;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                            @Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_fragment2,
-                container,false);
-        Button btn = (Button)view.findViewById(R.id.selectBtn);
-        btn.setOnClickListener(
-                new Button.OnClickListener(){
-                    public void onClick(View v){
-                        Intent i = new Intent(getActivity(), CustomGallery.class);
-                        getActivity().startActivityForResult(i, 2);
-                    }
-                }
-
-        );
-        GridView gv = (GridView)view.findViewById(R.id.ImgGridView);
-        final ImageAdapter ia = new ImageAdapter(getActivity());
-        gv.setAdapter(ia);
-        gv.setOnItemClickListener(new OnItemClickListener(){
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id){
-                ia.callImageViewer(position);
-            }
-        });
-
         return view;
     }
+
+    public void showImages(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkPermission()) {
+            requestPermission();
+            //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+        }else {
+            btn.setOnClickListener(
+                    new Button.OnClickListener() {
+                        public void onClick(View v) {
+                            Intent intent = new Intent(Intent.ACTION_PICK);
+                            intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+                            startActivityForResult(intent, PICK_FROM_ALBUM);
+                        }
+                    }
+            );
+            final ImageAdapter ia = new ImageAdapter(getActivity());
+            gv.setAdapter(ia);
+            gv.setOnItemClickListener(new OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    ia.callImageViewer(position);
+                }
+            });
+        }
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK){
@@ -210,20 +110,33 @@ public class Fragment2 extends Fragment {
             }
         }
     }
-
-
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        BusProvider.getInstance().register(this);
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                android.os.Process.killProcess(android.os.Process.myPid());
+                 //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
+            } else {
+                Toast.makeText(getActivity(), "Until you grant the permission, we cannot display the images", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
-    @Override
-    public void onDestroyView() {
-        BusProvider.getInstance().unregister(this);
-        super.onDestroyView();
 
-    }
+    /*@Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                showImages();
+            } else {
+                Toast.makeText(getActivity(), "Until you grant the permission, we cannot display the contacts", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }*/
 
     /**==========================================
      * 		        Adapter class
@@ -267,9 +180,10 @@ public class Fragment2 extends Fragment {
 
         public View getView(int position, View convertView, ViewGroup parent) {
             ImageView imageView;
+            int width = gv.getWidth();
             if (convertView == null){
                 imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new GridView.LayoutParams(250, 250));
+                imageView.setLayoutParams(new GridView.LayoutParams(320, 320));
                 imageView.setAdjustViewBounds(false);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 imageView.setPadding(2, 2, 2, 2);
@@ -279,7 +193,7 @@ public class Fragment2 extends Fragment {
             BitmapFactory.Options bo = new BitmapFactory.Options();
             bo.inSampleSize = 8;
             Bitmap bmp = BitmapFactory.decodeFile(thumbsDataList.get(position), bo);
-            Bitmap resized = Bitmap.createScaledBitmap(bmp, 250, 250, true);
+            Bitmap resized = Bitmap.createScaledBitmap(bmp, 320, 320, true);
             imageView.setImageBitmap(resized);
 
             return imageView;
@@ -343,4 +257,3 @@ public class Fragment2 extends Fragment {
         }
     }
 }
-

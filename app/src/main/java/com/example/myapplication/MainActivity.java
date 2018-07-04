@@ -8,10 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
-import android.support.v4.app.FragmentTransaction;
-import android.widget.Toast;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+import android.widget.ListView;
+import android.widget.ArrayAdapter;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -49,11 +47,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         BusProvider.getInstance().post(new ActivityResultEvent(requestCode, resultCode, data));
-    }
-
-    @Subscribe
-    public void onActivityResult(ActivityResultEvent activityResultEvent){
-        onActivityResult(activityResultEvent.getRequestCode(), activityResultEvent.getResultCode(), activityResultEvent.getData());
     }
 
     private class pagerAdapter extends FragmentStatePagerAdapter
