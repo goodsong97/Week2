@@ -7,7 +7,12 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import android.os.Message;
 
 import org.w3c.dom.Text;
 
@@ -37,6 +42,9 @@ public class Game extends AppCompatActivity {
     private int velocity = DEFAULT_VELOCITY;
     private TextView score_board;
     private String score_string;
+    private ImageView view1;
+    private ImageView character;
+    private boolean IS_LEFT = true;
     public Game() {
     }
 
@@ -47,9 +55,18 @@ public class Game extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.game_view);
+        view1 = (ImageView) findViewById(R.id.imageAnimation);
+        view1.setBackgroundResource(R.drawable.ground);
+        character = (ImageView) findViewById(R.id.dino);
+        character.setBackgroundResource(R.drawable.left);
+
         Button jump_but = (Button)findViewById(R.id.jump);
         Button start_but = (Button)findViewById(R.id.start);
         Button restart_but = (Button)findViewById(R.id.restart);
+
+
+
+
         jump_but.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -64,6 +81,7 @@ public class Game extends AppCompatActivity {
                 GameStart();
             }
         };
+
         start_but.setOnClickListener(start_listener);
         restart_but.setOnClickListener(start_listener);
         score_board = (TextView) findViewById(R.id.scoreboard);
@@ -81,7 +99,7 @@ public class Game extends AppCompatActivity {
         int cnt=0;
         current_score=0;
         while(alive){
-
+            Move();
             /*
             1. if(character의 img == R.Drawable.right) img.set(R.Drawable.left);
             2. 장애물 이미지를 game_view.xml 에 등록시키고, while의 한 주기동안 왼쪽으로 이동하게 끔한다.
@@ -98,6 +116,17 @@ public class Game extends AppCompatActivity {
         score_board.setText(score_string);
     }
 
+    public void Move(){
+        if (IS_LEFT){
+            character.setImageResource(R.drawable.rright);
+        }
+        else{
+            character.setImageResource(R.drawable.left);
+            IS_LEFT = false;
+        }
+    }
+
     // Character와 장애물이 만나는 event.
     // alive =false;
+
 }
