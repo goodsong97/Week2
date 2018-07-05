@@ -10,9 +10,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import java.util.Random;
+import android.view.animation.Animation.AnimationListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,7 +44,7 @@ import static com.example.myapplication.R.drawable.jjump;
 
 public class Game extends AppCompatActivity {
 
-    static private int DEFAULT_VELOCITY=50;
+    static private int DEFAULT_VELOCITY=1;
     private boolean alive = true; // false is die, true is alive.
     private int high_score = 0;
     private int current_score=0;
@@ -52,13 +55,21 @@ public class Game extends AppCompatActivity {
     private ImageView view1;
     private ImageView character;
     private ImageView obstacle;
+    private ImageView obstacle2;
     private View lin;
+    private View lin2;
+    private Random rnd;
+    private boolean jump = false;
+    private boolean blank = true;
+    private boolean first = true;
+    private boolean permission = true;
 
     private boolean IS_LEFT = true;
     private int cnt = 0;
     private static Timer timer1;
     private static Timer timer2;
     private Button jump_but;
+    private Button kill_but;
     private static TimerTask tt1;
     private static TimerTask tt2;
     public Game() {
@@ -76,8 +87,11 @@ public class Game extends AppCompatActivity {
         character = (ImageView) findViewById(R.id.dino);
         character.setBackgroundResource(R.drawable.left);
         obstacle = (ImageView) findViewById(R.id.obstacle);
+        lin2 = findViewById(R.id.lin2);
+        obstacle2 = (ImageView) findViewById(R.id.obstacle2);
         lin = findViewById(R.id.lin);
         jump_but = (Button)findViewById(R.id.jump);
+        kill_but = (Button)findViewById(R.id.kill);
         final Animation animTransUp = AnimationUtils.loadAnimation(
                 this, R.anim.anim_translate_up);
         timer1 = new Timer();
@@ -109,89 +123,78 @@ public class Game extends AppCompatActivity {
                 timer1.schedule(tt1,0,100);
             }
         });
-
-
-
-        /*Button jump_but = (Button)findViewById(R.id.jump);
-        Button start_but = (Button)findViewById(R.id.start);
-        Button restart_but = (Button)findViewById(R.id.restart);*/
-
-
-
-        /*View.OnClickListener start_listener = new View.OnClickListener(){
+        kill_but.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View view){
-                alive = true;
-                final Handler handler = new Handler(){
-                    public void handleMessage(Message msg){
-                        StartGame(cnt);
-                    }
-                };
-
-                TimerTask tt = new TimerTask(){
-                    @Override
-                    public void run(){
-                        Message msg = handler.obtainMessage();
-                        handler.sendMessage(msg);
-                        cnt++;
-                    }
-                    @Override
-                    public boolean cancel() {
-                        return super.cancel();
-                    }
-                };
-                Timer timer = new Timer();
-                timer.schedule(tt,0,100);
+            public void onClick(View view) {
+                alive =false;
+                permission = true;
+                timer1.cancel();
+                timer1 = new Timer();
             }
-        };*/
-        /*start_but.setOnClickListener(start_listener);
-        restart_but.setOnClickListener(start_listener);*/
+
+        });
         score_board = (TextView) findViewById(R.id.scoreboard);
         begin = (TextView) findViewById(R.id.begin);
+        animTransUp.setAnimationListener(new AnimationListener(){
+            public void onAnimationEnd(Animation animation){
+                jump=false;
+            }
+            public void onAnimationStart(Animation animation){
+                jump=true;}
+            public void onAnimationRepeat(Animation animation){;}
+        });
     }
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        begin.setText("");
-        alive = true;
-        MovingBackground();
-        final Handler handler = new Handler(){
-            public void handleMessage(Message msg){
-                Move();
-            }
-        };
-        final Handler handler2 = new Handler(){
-            public void handleMessage(Message msg){
-                StartGame(cnt);
-            }
-        };
-        tt1 = new TimerTask(){
-            @Override
-            public void run(){
-                Message msg = handler.obtainMessage();
-                handler.sendMessage(msg);
-              }
-            @Override
-            public boolean cancel(){
-                return super.cancel();
-            }
-        };
-        tt2 = new TimerTask(){
-            @Override
-            public void run(){
-                Message msg = handler2.obtainMessage();
-                handler2.sendMessage(msg);
-                cnt++;
-            }
-            @Override
-            public boolean cancel(){
-                return super.cancel();
-            }
-        };
-        timer1.schedule(tt1,0,100);
-        timer2.schedule(tt2,0,100);
-        return super.onTouchEvent(event);
+        if(permission) {
+            permission=false;
+            first = true;
+            begin.setText("");
+            alive = true;
+            blank = true;
+            MovingBackground();
+            final Handler handler = new Handler() {
+                public void handleMessage(Message msg) {
+                    Move();
 
+                }
+            };
+            final Handler handler2 = new Handler() {
+                public void handleMessage(Message msg) {
+                    StartGame(cnt);
+                }
+            };
+            tt1 = new TimerTask() {
+                @Override
+                public void run() {
+                    Message msg = handler.obtainMessage();
+                    handler.sendMessage(msg);
+                }
+
+                @Override
+                public boolean cancel() {
+                    return super.cancel();
+                }
+            };
+            tt2 = new TimerTask() {
+                @Override
+                public void run() {
+                    Message msg = handler2.obtainMessage();
+                    handler2.sendMessage(msg);
+                    cnt++;
+                }
+
+                @Override
+                public boolean cancel() {
+                    return super.cancel();
+                }
+            };
+            timer1.schedule(tt1, 0, 100);
+            timer2.schedule(tt2, 0, 100);
+            return super.onTouchEvent(event);
+        }
+        return false;
 
     }
 
@@ -205,16 +208,36 @@ public class Game extends AppCompatActivity {
     public void StartGame(int cnt){
 
         score_string = ("HI "+ high_score) + "   " + current_score;
-        if(cnt%10==0){ velocity += 3;} // velocity update
-        current_score += velocity/5; //score update
+        if(cnt%10==0 && velocity<=7 ){ velocity += 1;} // velocity update
+        current_score += velocity; //score update
         score_board.setText(score_string); //score_board update
-        if(!alive) high_score = current_score; //high_score update
+        if(!alive) {
+            if(high_score<=current_score)
+                high_score = current_score; //high_score update
+            timer1.cancel();
+            timer2.cancel();
+            score_board.setText(score_string);
+            begin.setText("Touch Anywhere to Restart");
+            timer1 = new Timer();
+            timer2 = new Timer();
+            current_score=0;
+            return;
+        }
         score_board.setText(score_string);
+        if(cnt%39==0){
+            MovingBackground();
+            return;
+        }
+        else if(cnt%81==0){
+            MovingBackground2();
+            return;
+        }
             /*
             1. if(character의 img == R.Drawable.right) img.set(R.Drawable.left);
             2. 장애물 이미지를 game_view.xml 에 등록시키고, while의 한 주기동안 왼쪽으로 이동하게 끔한다.
             즉, 장애물. x좌표 = x좌표 - velocity; 가 되게끔!!
              */
+
 
 }
     public void Move(){
@@ -230,9 +253,68 @@ public class Game extends AppCompatActivity {
     }
 
     public void MovingBackground(){
+        final Animation animTransLeft1 = AnimationUtils.loadAnimation(
+                this, R.anim.anim_translate_left);
+        int[] arr = {0, R.drawable.obstacle1, R.drawable.obstacle2, R.drawable.obstacle3};
+        rnd = new Random();
+        int num = rnd.nextInt(3);
+        if(num!=0) blank=false;
+        if(first) {obstacle.setImageResource(0); blank=true; first=false;}
+        else {
+            obstacle.setImageResource(arr[num]);
+        }
+        lin.startAnimation(animTransLeft1);
+        double s = lin.getWidth()-character.getWidth()/2-obstacle.getWidth();
+        double s1= ((lin.getWidth()-10)/1.5)*s;
+        final int s2 = (int)s1;
+        animTransLeft1.setAnimationListener(new AnimationListener(){
+            public void onAnimationEnd(Animation animation){
+                obstacle.setImageResource(0);
+            }
+            public void onAnimationStart(Animation animation){Handler delayHandler = new Handler();
+                delayHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(jump==false&&!blank){
+                            alive=false;
+                            permission = true;
+                                                    }
+                    }
+                }, 1400);}
+            public void onAnimationRepeat(Animation animation){;}
+        });
+        blank = true;
+
+    }
+    public void MovingBackground2(){
         final Animation animTransLeft = AnimationUtils.loadAnimation(
                 this, R.anim.anim_translate_left);
-        obstacle.setImageResource(R.drawable.obstacle1);
-        lin.startAnimation(animTransLeft);
-    }
+        int[] arr = {0, R.drawable.obstacle1, R.drawable.obstacle2, R.drawable.obstacle3};
+        rnd = new Random();
+        int num = rnd.nextInt(3);
+        if(num!=0) blank=false;
+        obstacle2.setImageResource(arr[num]);
+        lin2.startAnimation(animTransLeft);
+        double s = lin2.getWidth()-character.getWidth()/2-obstacle2.getWidth();
+        double s1= ((lin2.getWidth()-10)/1.5)*s;
+        final int s2 = (int)s1;
+        animTransLeft.setAnimationListener(new AnimationListener(){
+            public void onAnimationEnd(Animation animation){
+                obstacle2.setImageResource(0);
+            }
+            public void onAnimationStart(Animation animation){Handler delayHandler = new Handler();
+                delayHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(jump==false&&!blank){
+                            alive = false;
+                            permission = true;
+                                                    }
+                    }
+                }, 1400);}
+            public void onAnimationRepeat(Animation animation){;}
+        });
+        blank = true;
+        }
+
 }

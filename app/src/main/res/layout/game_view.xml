@@ -51,7 +51,8 @@
         android:layout_alignBottom="@+id/imageAnimation"
         android:layout_alignRight="@+id/imageAnimation"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingLeft="200dp">
     <ImageView
         android:id="@+id/obstacle"
         android:layout_width="wrap_content"
@@ -59,6 +60,21 @@
         android:layout_marginRight="10dp"
         android:adjustViewBounds="true" />
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/lin2"
+        android:layout_alignBottom="@+id/imageAnimation"
+        android:layout_alignRight="@+id/imageAnimation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="200dp">
+        <ImageView
+            android:id="@+id/obstacle2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:adjustViewBounds="true" />
+    </LinearLayout>
+
     <Button
         android:layout_below="@+id/imageAnimation"
         android:layout_width="150dp"
@@ -66,6 +82,15 @@
         android:layout_centerInParent="true"
         android:text="jump"
         android:id="@+id/jump"
+        />
+    <Button
+        android:layout_toRightOf="@+id/jump"
+        android:layout_below="@+id/imageAnimation"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:text="kill"
+        android:id="@+id/kill"
         />
 
 </RelativeLayout>
