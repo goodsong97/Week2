@@ -30,25 +30,23 @@ public class Modify_dialog extends Dialog implements View.OnClickListener{
     private Context context;
     private String name;
     private String pn;
-    private ListViewItem result;
     private Drawable icon;
-    private EditText edit_name;
+    private EditText edit_text;
     private EditText ph;
     private int PICK_IMAGE_REQUEST=1;
     Button submit;
     Button get_user_img;
 
-    public Modify_dialog(Context context,Drawable icon, String name, String pn) {
+    public Modify_dialog(Context context) {
         super(context);
-        this.result = new ListViewItem();
         this.context = context;
         this.icon = icon;
-        this.name = name;
+        this.name = "aaaaa";
         this.pn = pn;
     }
 
-    public ListViewItem getResult() {
-        return result;
+    public String getResult() {
+        return name;
     }
 
     @Override
@@ -56,8 +54,8 @@ public class Modify_dialog extends Dialog implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(LAYOUT);
 
-        edit_name = (EditText)findViewById(R.id.edit_name);
-        ph = (EditText)findViewById(R.id.edit_ph);
+        edit_text = (EditText)findViewById(R.id.edit_ph);
+        //ph = (EditText)findViewById(R.id.edit_ph);
         Button submit = (Button) findViewById(R.id.submit);
         Button quit = (Button) findViewById(R.id.quit);
         submit.setOnClickListener(this);
@@ -68,17 +66,14 @@ public class Modify_dialog extends Dialog implements View.OnClickListener{
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.submit :
-                String name_str = edit_name.getText().toString();
-                String ph_str = ph.getText().toString();
-                result.setIconDrawable(icon);
-                result.setName(name_str);
-                result.setPh_num(ph_str);
+                String name_str = edit_text.getText().toString();
+                //String ph_str = ph.getText().toString();
+                //result.setIconDrawable(icon);
+                name = name_str;
+               // result.setPh_num(ph_str);
                 dismiss();
                 break;
             case R.id.quit:
-                result.setIconDrawable(icon);
-                result.setName(name);
-                result.setPh_num(pn);
                 dismiss();
                 break;
         }
